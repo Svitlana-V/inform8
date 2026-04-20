@@ -185,7 +185,7 @@
         let currentLessonId = null;
         const modelName = "gemini-2.5-flash"; 
 
-        async function geminiCall(prompt, systemInstruction = "Ти професійний вчитель веб-розробки. Відповідай українською мовою.") {
+        async function geminiCall(prompt, systemInstruction = "Ти професійний вчитель веб-розробки. Відповідай українською мовою до 100 слів") {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
