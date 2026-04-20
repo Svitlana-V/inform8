@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інтерактивна Програма: Мій перший сайт + AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Stone & Indigo Accent -->
+    <!-- Application Structure Plan: The SPA uses a dashboard-style layout to present the 7-lesson curriculum. It is now enhanced with Gemini AI features: an AI Topic Generator to help students brainstorm, and an AI Code Assistant within the curriculum view to explain complex topics. This structure prioritizes interactive learning and helps beginners overcome the 'blank page' syndrome. -->
+    <!-- Visualization & Content Choices: 1. Curriculum -> Interactive Master-Detail View. 2. Grading -> Chart.js Doughnut. 3. AI Features -> Gemini API Integration for dynamic text generation. Confirming NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #fafaf9;
+            color: #1c1917;
+        }
+        .lesson-btn.active {
+            background-color: #e0e7ff;
+            border-left-width: 4px;
+            border-color: #4f46e5;
+            color: #312e81;
+            font-weight: 600;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ai-loading {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold tracking-tight">🚀 Мій перший сайт</div>
+            <div class="space-x-4 text-sm font-medium flex items-center">
+                <a href="#overview" class="hover:text-indigo-200 transition-colors">Огляд</a>
+                <a href="#curriculum" class="hover:text-indigo-200 transition-colors">Програма</a>
+                <a href="#grading" class="hover:text-indigo-200 transition-colors">Оцінювання</a>
+                <button onclick="openAiBrainstorm()" class="bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded-full text-xs font-bold transition-all">✨ Ідеї</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-16">
+        
+        <section id="overview" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 md:p-12">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-8">
+                <div class="max-w-2xl">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-stone-800 mb-4">Від ідеї до власного хостингу</h1>
+                    <p class="text-lg text-stone-600 mb-8 leading-relaxed">
+                        Цей інтерактивний посібник представляє 7-крокову програму для початківців. 
+                    </p>
+                </div>
+                <div id="ai-brainstorm-box" class="w-full md:w-80 bg-indigo-50 border border-indigo-100 p-6 rounded-2xl hidden md:block">
+                    <h3 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">✨ ШІ-генератор тем</h3>
+                    <p class="text-xs text-indigo-700 mb-4">Не знаєте, про що зробити сайт? Опишіть свої хобі, і ШІ запропонує ідеї.</p>
+                    <input type="text" id="hobby-input" placeholder="Напр: космос, коти, ігри..." class="w-full px-3 py-2 rounded-lg border border-indigo-200 text-sm mb-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <button id="generate-ideas-btn" onclick="generateIdeas()" class="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all">Згенерувати ✨</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-100 flex items-start space-x-4">
+                    <div class="text-4xl">📚</div>
+                    <div>
+                        <h3 class="font-bold text-lg">7 Уроків</h3>
+                        <p class="text-sm text-stone-500">Покрокова структура від HTML до хостингу.</p>
+                    </div>
+                </div>
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-100 flex items-start space-x-4">
+                    <div class="text-4xl">💻</div>
+                    <div>
+                        <h3 class="font-bold text-lg">1 Проєкт</h3>
+                        <p class="text-sm text-stone-500">Практична робота над єдиним особистим сайтом.</p>
+                    </div>
+                </div>
+                <div class="bg-stone-50 p-6 rounded-xl border border-stone-100 flex items-start space-x-4">
+                    <div class="text-4xl">🏆</div>
+                    <div>
+                        <h3 class="font-bold text-lg">100 Балів</h3>
+                        <p class="text-sm text-stone-500">Комплексна система оцінювання навичок.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Ideas Modal for Mobile -->
+        <div id="ai-modal" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+                <button onclick="closeAiModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">✕</button>
+                <h3 class="font-bold text-xl text-stone-800 mb-2 flex items-center gap-2">✨ ШІ-помічник</h3>
+                <div id="ai-modal-body" class="space-y-4">
+                    <p class="text-stone-600">Опишіть свої інтереси для отримання ідей:</p>
+                    <textarea id="hobby-input-mobile" placeholder="Напр: малювання, футбол, фізика..." class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:ring-2 focus:ring-indigo-500 outline-none h-24"></textarea>
+                    <button onclick="generateIdeasMobile()" id="gen-btn-mobile" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Згенерувати ✨</button>
+                </div>
+                <div id="ai-result" class="mt-6 text-sm text-stone-700 leading-relaxed overflow-y-auto max-h-60 p-4 bg-stone-50 rounded-xl hidden"></div>
+            </div>
+        </div>
+
+        <section id="curriculum" class="space-y-6">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Інтерактивна Навчальна Програма</h2>
+                <p class="text-stone-600 max-w-3xl">
+                    У цьому розділі ви знайдете деталі кожного уроку. Оберіть тему, щоб побачити теорію та практику. Якщо вам не зрозумілий певний термін, скористайтеся кнопкою ✨ біля назви теми.
+                </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+                <div class="w-full md:w-1/3 bg-stone-50 border-b md:border-b-0 md:border-r border-stone-200 p-4" id="lesson-list">
+                </div>
+
+                <div class="w-full md:w-2/3 p-6 md:p-8" id="lesson-content">
+                    <div class="h-full flex flex-col justify-center items-center text-stone-400 min-h-[400px]">
+                        <div class="text-5xl mb-4">👈</div>
+                        <p class="text-lg">Оберіть урок для перегляду деталей</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="grading" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-8 md:p-12 mb-16">
+            <div class="mb-8 md:text-center">
+                <h2 class="text-3xl font-bold text-stone-800 mb-2">Система Оцінювання</h2>
+                <div class="chart-container mt-8">
+                    <canvas id="gradingChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mt-8" id="grading-legend">
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-8 text-center text-sm">
+        <p>Розроблено на основі курсу "Мій перший сайт" з підтримкою Gemini API</p>
+    </footer>
+
+    <script>
+        const apiKey = ""; // Runtime provided
+        const lessonsData = [
+            { id: 1, title: "Основи HTML: Каркас проєкту", emoji: "🏗️", theory: ["Що таке HTML?", "Анатомія тегу", "Структура документа", "Теги тексту"], practice: ["Створення index.html", "Написання структури", "Додавання контенту"], task: "Сформувати текстову основу сайту: назва (H1), опис (P) та список цікавих фактів." },
+            { id: 2, title: "Git та GitHub: Збереження", emoji: "⏱️", theory: ["Контроль версій", "GitHub", "Commit & Push"], practice: ["Реєстрація", "GitHub Desktop", "Синхронізація"], task: "Завантажити код на GitHub та перевірити його відображення." },
+            { id: 3, title: "CSS: Кольори та стиль", emoji: "🎨", theory: ["Роль CSS", "Синтаксис", "Кольори та шрифти", "Каскадність"], practice: ["Створення style.css", "Підключення CSS", "Налаштування шрифтів"], task: "Оформити сайт у вибраній гамі (2 основні кольори) та змінити шрифт." },
+            { id: 4, title: "Контент та Flexbox", emoji: "🧩", theory: ["Тег img та alt", "Box Model", "Основи Flexbox"], practice: ["Вставка зображень", "Створення карток", "Вирівнювання у ряд"], task: "Створити галерею або секцію з картками, вирівняними по центру." },
+            { id: 5, title: "Вебформи: Зворотний зв'язок", emoji: "✉️", theory: ["Навіщо форми?", "Типи інпутів", "Атрибути placeholder & required"], practice: ["Тег form", "Поля введення", "Стилізація кнопок"], task: "Додати розділ 'Контакти' або 'Задати питання' з полями введення." },
+            { id: 6, title: "SEO та Code Review", emoji: "🔍", theory: ["Мета-теги", "Баги та GitHub Issues", "Пошукова оптимізація"], practice: ["Додавання мета-тегів", "Перевірка сайту колеги"], task: "Виправити Issue від однокласника та налаштувати пошуковий опис." },
+            { id: 7, title: "Хостинг та Презентація", emoji: "🚀", theory: ["GitHub Pages", "Публічний хостинг"], practice: ["Деплой", "Фінальне посилання", "Мобільний тест"], task: "Успішний деплой та презентація проєкту перед класом." }
+        ];
+
+        const gradingData = [
+            { category: "Технічна реалізація", points: 40, color: "#4f46e5", details: "HTML (10), CSS (10), Форма/Фото (10), Flexbox (10)" },
+            { category: "Робота з Git", points: 20, color: "#06b6d4", details: "Мінімум 5 осмислених коммітів" },
+            { category: "SEO та деталі", points: 20, color: "#8b5cf6", details: "Title, meta-опис, favicon" },
+            { category: "М'які навички", points: 20, color: "#f59e0b", details: "Створення Issue та захист проєкту" }
+        ];
+
+        let currentLessonId = null;
+
+        async function geminiCall(prompt, systemInstruction = "Ти професійний вчитель веб-розробки. Відповідай українською мовою.") {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (e) {
+                    await new Promise(r => setTimeout(r, Math.pow(2, i) * 1000));
+                }
+            }
+            return "Вибачте, виникла помилка. Спробуйте ще раз.";
+        }
+
+        async function generateIdeas() {
+            const input = document.getElementById('hobby-input').value;
+            if (!input) return;
+            const btn = document.getElementById('generate-ideas-btn');
+            btn.innerText = "Думаю... ✨";
+            btn.disabled = true;
+
+            const prompt = `Запропонуй 3 цікаві ідеї для навчального веб-сайту для початківця. Мої хобі або інтереси: ${input}. Для кожної ідеї напиши коротку структуру (який текст і які картинки додати).`;
+            const result = await geminiCall(prompt);
+            
+            showAiResult(result);
+            btn.innerText = "Згенерувати ✨";
+            btn.disabled = false;
+        }
+
+        async function generateIdeasMobile() {
+            const input = document.getElementById('hobby-input-mobile').value;
+            if (!input) return;
+            const btn = document.getElementById('gen-btn-mobile');
+            btn.innerText = "Думаю... ✨";
+            btn.disabled = true;
+
+            const prompt = `Запропонуй 3 ідеї для сайту на основі: ${input}. Коротко і зрозуміло.`;
+            const result = await geminiCall(prompt);
+            
+            showAiResult(result);
+            btn.innerText = "Згенерувати ✨";
+            btn.disabled = false;
+        }
+
+        async function explainTopic(topic) {
+            const modal = document.getElementById('ai-modal');
+            const body = document.getElementById('ai-modal-body');
+            const resultDiv = document.getElementById('ai-result');
+            
+            modal.classList.remove('hidden');
+            body.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = `<p class="ai-loading">✨ Пояснюю тему "${topic}" для початківця...</p>`;
+
+            const prompt = `Поясни початківцю тему "${topic}" у веб-розробці. Використовуй прості аналогії та наведи приклад коду, якщо це доречно.`;
+            const result = await geminiCall(prompt);
+            
+            resultDiv.innerHTML = result.replace(/\n/g, '<br>');
+        }
+
+        function showAiResult(text) {
+            const modal = document.getElementById('ai-modal');
+            const body = document.getElementById('ai-modal-body');
+            const resultDiv = document.getElementById('ai-result');
+            
+            modal.classList.remove('hidden');
+            body.classList.add('hidden');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = text.replace(/\n/g, '<br>');
+        }
+
+        function openAiBrainstorm() {
+            document.getElementById('ai-modal').classList.remove('hidden');
+            document.getElementById('ai-modal-body').classList.remove('hidden');
+            document.getElementById('ai-result').classList.add('hidden');
+        }
+
+        function closeAiModal() {
+            document.getElementById('ai-modal').classList.add('hidden');
+        }
+
+        function initApp() {
+            renderLessonList();
+            renderGradingChart();
+            renderGradingLegend();
+        }
+
+        function renderLessonList() {
+            const listContainer = document.getElementById('lesson-list');
+            listContainer.innerHTML = '';
+            lessonsData.forEach(lesson => {
+                const btn = document.createElement('button');
+                btn.className = `lesson-btn w-full text-left px-4 py-3 rounded-lg mb-2 transition-all duration-200 text-stone-700 hover:bg-stone-200 flex items-center justify-between`;
+                btn.onclick = () => selectLesson(lesson.id);
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl">${lesson.emoji}</span>
+                        <span class="font-medium text-sm">Урок ${lesson.id}: ${lesson.title.split(':')[0]}</span>
+                    </div>
+                `;
+                btn.id = `btn-lesson-${lesson.id}`;
+                listContainer.appendChild(btn);
+            });
+        }
+
+        function selectLesson(id) {
+            if (currentLessonId) document.getElementById(`btn-lesson-${currentLessonId}`).classList.remove('active');
+            currentLessonId = id;
+            document.getElementById(`btn-lesson-${id}`).classList.add('active');
+            
+            const lesson = lessonsData.find(l => l.id === id);
+            const contentContainer = document.getElementById('lesson-content');
+            const buildList = (items) => `<ul class="list-disc pl-5 space-y-1 mt-2 text-stone-600">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+
+            contentContainer.innerHTML = `
+                <div class="fade-in space-y-6">
+                    <div class="border-b border-stone-200 pb-4 flex justify-between items-start">
+                        <div>
+                            <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-bold rounded-full mb-3 uppercase tracking-wider">Урок ${lesson.id}</span>
+                            <h3 class="text-2xl font-bold text-stone-800">${lesson.emoji} ${lesson.title}</h3>
+                        </div>
+                        <button onclick="explainTopic('${lesson.title}')" class="bg-indigo-600 text-white p-2 rounded-lg text-sm flex items-center gap-2 hover:bg-indigo-700 transition-all">✨ Поясни мені</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                        <div class="bg-stone-50 p-4 rounded-xl border border-stone-100">
+                            <h4 class="font-bold text-stone-800 flex items-center gap-2">📖 Теорія</h4>
+                            ${buildList(lesson.theory)}
+                        </div>
+                        <div class="bg-stone-50 p-4 rounded-xl border border-stone-100">
+                            <h4 class="font-bold text-stone-800 flex items-center gap-2">🛠️ Практика</h4>
+                            ${buildList(lesson.practice)}
+                        </div>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl">
+                        <h4 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">🎯 Завдання</h4>
+                        <p class="text-indigo-800 text-sm">${lesson.task}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderGradingChart() {
+            const ctx = document.getElementById('gradingChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: gradingData.map(d => d.category),
+                    datasets: [{
+                        data: gradingData.map(d => d.points),
+                        backgroundColor: gradingData.map(d => d.color),
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderGradingLegend() {
+            const legendContainer = document.getElementById('grading-legend');
+            legendContainer.innerHTML = gradingData.map(item => `
+                <div class="flex items-center space-x-3 p-3 rounded-lg bg-stone-50 border border-stone-100">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-xs shrink-0" style="background-color: ${item.color}">${item.points}</div>
+                    <div>
+                        <h4 class="font-bold text-stone-800 text-xs">${item.category}</h4>
+                        <p class="text-[10px] text-stone-500">${item.details}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
