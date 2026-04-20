@@ -164,13 +164,13 @@
     </footer>
 
     <script>
-        const apiKey = ""; // Runtime provided
+        const apiKey = "AIzaSyCEzqWBUW__fiITzca9NBvammX2hfVu8K8"; // Runtime provided
         const lessonsData = [
             { id: 1, title: "Основи HTML: Каркас проєкту", emoji: "🏗️", theory: ["Що таке HTML?", "Анатомія тегу", "Структура документа", "Теги тексту"], practice: ["Створення index.html", "Написання структури", "Додавання контенту"], task: "Сформувати текстову основу сайту: назва (H1), опис (P) та список цікавих фактів." },
             { id: 2, title: "Git та GitHub: Збереження", emoji: "⏱️", theory: ["Контроль версій", "GitHub", "Commit & Push"], practice: ["Реєстрація", "GitHub Desktop", "Синхронізація"], task: "Завантажити код на GitHub та перевірити його відображення." },
             { id: 3, title: "CSS: Кольори та стиль", emoji: "🎨", theory: ["Роль CSS", "Синтаксис", "Кольори та шрифти", "Каскадність"], practice: ["Створення style.css", "Підключення CSS", "Налаштування шрифтів"], task: "Оформити сайт у вибраній гамі (2 основні кольори) та змінити шрифт." },
             { id: 4, title: "Контент та Flexbox", emoji: "🧩", theory: ["Тег img та alt", "Box Model", "Основи Flexbox"], practice: ["Вставка зображень", "Створення карток", "Вирівнювання у ряд"], task: "Створити галерею або секцію з картками, вирівняними по центру." },
-            { id: 5, title: "Вебформи: Зворотний зв'язок", emoji: "✉️", theory: ["Навіщо форми?", "Типи інпутів", "Атрибути placeholder & required"], practice: ["Тег form", "Поля введення", "Стилізація кнопок"], task: "Додати розділ 'Контакти' або 'Задати питання' з полями введення." },
+            { id: 5, title: "Вебформи: Зворотний зв`язок", emoji: "✉️", theory: ["Навіщо форми?", "Типи інпутів", "Атрибути placeholder & required"], practice: ["Тег form", "Поля введення", "Стилізація кнопок"], task: "Додати розділ 'Контакти' або 'Задати питання' з полями введення." },
             { id: 6, title: "SEO та Code Review", emoji: "🔍", theory: ["Мета-теги", "Баги та GitHub Issues", "Пошукова оптимізація"], practice: ["Додавання мета-тегів", "Перевірка сайту колеги"], task: "Виправити Issue від однокласника та налаштувати пошуковий опис." },
             { id: 7, title: "Хостинг та Презентація", emoji: "🚀", theory: ["GitHub Pages", "Публічний хостинг"], practice: ["Деплой", "Фінальне посилання", "Мобільний тест"], task: "Успішний деплой та презентація проєкту перед класом." }
         ];
@@ -183,9 +183,10 @@
         ];
 
         let currentLessonId = null;
+        const modelName = "gemini-2.5-flash"; 
 
         async function geminiCall(prompt, systemInstruction = "Ти професійний вчитель веб-розробки. Відповідай українською мовою.") {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             const payload = {
                 contents: [{ parts: [{ text: prompt }] }],
                 systemInstruction: { parts: [{ text: systemInstruction }] }
